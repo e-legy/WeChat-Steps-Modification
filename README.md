@@ -1,6 +1,6 @@
 # WeChat-Steps-Modification
 
-这个项目旨在帮助你定期运行Python脚本，以便在需要时修改特定账号的步数。脚本运行失败时，会通过Telegram向你发送通知，以便你可以及时采取行动。以下是关于如何使用和配置该项目的详细说明。
+这个项目旨在帮助你定期运行Python脚本，以便在需要时修改特定账号的步数。脚本运行失败时，会通过ServerChan向你发送通知，以便你可以及时采取行动。以下是关于如何使用和配置该项目的详细说明。
 
 - 群聊: [HeroCore](https://t.me/HeroCore)
 - 频道: [HeroMsg](https://t.me/HeroMsg)
@@ -18,9 +18,7 @@
 
 在你的GitHub仓库中，点击上方菜单中的 "Settings"，然后选择 "Secrets" 选项卡。你需要添加以下几个Secrets以便项目正常工作：
 
-- `TELEGRAM_API_TOKEN`: 你的Telegram机器人API Token。你可以从 [BotFather](https://core.telegram.org/bots#botfather) 获取它。**（选填）**
-
-- `TELEGRAM_CHAT_ID`: 你希望接收通知的Telegram聊天ID。你可以从 [userinfobot](https://core.telegram.org/bots#usernames-and-telegram-ids) 获取它。**（选填）**
+- `SERVERCHAN_SENDKEY`: 你的Server酱sendkey。你可以从 (https://sc3.ft07.com/) 获取它。**（选填）**
 
 - `ACCOUNTS_AND_PASSWORDS`: 你想要修改步数的账号和密码对，以分号分隔。每个对之间使用逗号分隔。例如，`username1,password1;username2,password2`。请确保保密这个Secrets以保护你的账号信息。**（必填）**
 
