@@ -8,7 +8,7 @@ telegram_chat_id = os.environ.get('TELEGRAM_CHAT_ID')
 accounts_and_passwords = os.environ.get('ACCOUNTS_AND_PASSWORDS')
 
 # 检查必需的环境变量
-if not all([telegram_api_token, telegram_chat_id, accounts_and_passwords]):
+if not all([accounts_and_passwords]):
     print("Telegram API Token、聊天ID或账户信息未设置，无法继续操作。")
     exit(1)
 
