@@ -28,7 +28,6 @@ jobs:
 
     - name: Run
       env:
-        TELEGRAM_API_TOKEN: ${{ secrets.TELEGRAM_API_TOKEN }}
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
         ACCOUNTS_AND_PASSWORDS: ${{ secrets.ACCOUNTS_AND_PASSWORDS }}
       run: python steps.py
