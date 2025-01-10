@@ -4,14 +4,14 @@ import random
 import re
 
 # 获取环境变量
-serverchan_sendkey = os.environ.get('SERVERCHAN_SENDKEY')
-telegram_api_token = os.environ.get('TELEGRAM_API_TOKEN')  # Added: 获取 Telegram API Token
-telegram_chat_id = os.environ.get('TELEGRAM_CHAT_ID')      # Added: 获取 Telegram 聊天 ID
+serverchan_sendkey = os.environ.get('SERVERCHAN_SENDKEY')  # 可以为空
+telegram_api_token = os.environ.get('TELEGRAM_API_TOKEN')  # 可以为空
+telegram_chat_id = os.environ.get('TELEGRAM_CHAT_ID')      # 可以为空
 accounts_and_passwords = os.environ.get('ACCOUNTS_AND_PASSWORDS')
 
 # 检查必需的环境变量
-if not all([serverchan_sendkey, telegram_api_token, telegram_chat_id, accounts_and_passwords]):  # Added: 检查所有必需的环境变量
-    print("缺少必要的环境变量，无法继续操作。")  # Added: 更详细的错误提示
+if not accounts_and_passwords:  # 只检查 accounts_and_passwords
+    print("账户信息未设置，无法继续操作。")
     exit(1)
 
 # 解析账户和密码
@@ -19,16 +19,22 @@ account_password_pairs = [pair.split(',') for pair in accounts_and_passwords.spl
 
 # 发送 Telegram 消息
 def send_telegram_message(message):
+    if not telegram_api_token or not telegram_chat_id:  # 如果缺少 Telegram 配置，跳过
+        print("Telegram 配置未设置，跳过消息发送。")
+        return
     url = f"https://api.telegram.org/bot{telegram_api_token}/sendMessage"
     data = {'chat_id': telegram_chat_id, 'text': message, 'parse_mode': 'HTML'}
     try:
         response = requests.post(url, data=data)
-        response.raise_for_status()  # Added: 检查请求是否成功
+        response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        print(f"Telegram 消息发送失败：{e}")  # Added: 异常处理
+        print(f"Telegram 消息发送失败：{e}")
 
 # 发送 ServerChan 推送
 def sc_send(sendkey, title, desp='', options=None):
+    if not sendkey:  # 如果缺少 ServerChan 配置，跳过
+        print("ServerChan 配置未设置，跳过消息发送。")
+        return None
     if options is None:
         options = {}
     if sendkey.startswith('sctp'):
@@ -50,10 +56,10 @@ def sc_send(sendkey, title, desp='', options=None):
     }
     try:
         response = requests.post(url, json=params, headers=headers)
-        response.raise_for_status()  # Added: 检查请求是否成功
+        response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"ServerChan 推送失败：{e}")  # Added: 异常处理
+        print(f"ServerChan 推送失败：{e}")
         return None
 
 # 修改微信步数
@@ -66,12 +72,14 @@ def modify_steps(account, password, min_steps, max_steps, attempts=3, timeout=20
             result = response.json()
             if result.get('status') == 'success':
                 return f"账号 {account[:3]}***{account[-3:]} 修改成功，步数：{steps}"
-        except (requests.exceptions.RequestException, ValueError) as e:  # Added: 捕获 JSON 解析异常
+        except (requests.exceptions.RequestException, ValueError) as e:
             print(f"请求失败：{e}")
         if _ == attempts - 1:
-            send_telegram_message(f"<b>Steps_modifier</b>\n\n账号：{account}\n连续失败 {attempts} 次")
-            ret = sc_send(serverchan_sendkey, 'WeChat-Steps-Modification', f"账号：{account}\n连续失败 {attempts} 次")
-            print(ret)
+            if telegram_api_token and telegram_chat_id:  # 如果 Telegram 配置存在，发送通知
+                send_telegram_message(f"<b>Steps_modifier</b>\n\n账号：{account}\n连续失败 {attempts} 次")
+            if serverchan_sendkey:  # 如果 ServerChan 配置存在，发送通知
+                ret = sc_send(serverchan_sendkey, 'WeChat-Steps-Modification', f"账号：{account}\n连续失败 {attempts} 次")
+                print(ret)
     return f"账号 {account[:3]}***{account[-3:]} 修改失败"
 
 # 主程序
