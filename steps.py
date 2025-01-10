@@ -1,10 +1,10 @@
 import os
 import requests
 import random
+import re
 
 # 获取环境变量
-telegram_api_token = os.environ.get('TELEGRAM_API_TOKEN')
-telegram_chat_id = os.environ.get('TELEGRAM_CHAT_ID')
+serverchan_sendkey = os.environ.get('SERVERCHAN_SENDKEY')
 accounts_and_passwords = os.environ.get('ACCOUNTS_AND_PASSWORDS')
 
 # 检查必需的环境变量
@@ -20,6 +20,32 @@ def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{telegram_api_token}/sendMessage"
     data = {'chat_id': telegram_chat_id, 'text': message, 'parse_mode': 'HTML'}
     requests.post(url, data=data)
+
+# 发送 ServerChan 推送
+def sc_send(sendkey, title, desp='', options=None):
+    if options is None:
+        options = {}
+    # 判断 sendkey 是否以 'sctp' 开头，并提取数字构造 URL
+    if sendkey.startswith('sctp'):
+        match = re.match(r'sctp(\d+)t', sendkey)
+        if match:
+            num = match.group(1)
+            url = f'https://{num}.push.ft07.com/send/{sendkey}.send'
+        else:
+            raise ValueError('Invalid sendkey format for sctp')
+    else:
+        url = f'https://sctapi.ftqq.com/{sendkey}.send'
+    params = {
+        'title': title,
+        'desp': desp,
+        **options
+    }
+    headers = {
+        'Content-Type': 'application/json;charset=utf-8'
+    }
+    response = requests.post(url, json=params, headers=headers)
+    result = response.json()
+    return result
 
 # 执行步数修改操作
 def modify_steps(account, password, min_steps, max_steps, attempts=3, timeout=20):
@@ -38,6 +64,8 @@ def modify_steps(account, password, min_steps, max_steps, attempts=3, timeout=20
         # 失败三次后发送通知
         if _ == attempts - 1:
             send_telegram_message(f"<b>Steps_modifier</b>\n\n账号：{account}\n连续失败 {attempts} 次")
+            ret = sc_send(serverchan_sendkey, 'WeChat-Steps-Modification', f"账号：{account}\n连续失败 {attempts} 次")
+            print(ret)
 
     return f"账号 {account[:3]}***{account[-3:]} 修改失败"
 
