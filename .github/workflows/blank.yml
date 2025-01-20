@@ -5,7 +5,8 @@ on:
     branches:
      - main
   schedule:
-     - cron: '30 11 * * *'  # 在UTC时间上午10点6分运行
+     - cron: '30 7 * * *'  # 在UTC时间上午7点30分运行
+  workflow_dispatch:  # 手动触发
 
 #on:
 #  workflow_dispatch:  # 手动触发
