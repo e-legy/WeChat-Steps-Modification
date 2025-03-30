@@ -9,7 +9,6 @@ def sc_send(sendkey: str, title: str, desp: str = '') -> dict:
     if not sendkey:
         raise ValueError("Server酱SENDKEY未设置")
     
-    # 自动识别新旧版Server酱key
     if sendkey.startswith('sctp'):
         if not (match := re.fullmatch(r'sctp(\d+)t\w+', sendkey)):
             raise ValueError("无效的SCTP密钥格式")
@@ -30,22 +29,21 @@ def sc_send(sendkey: str, title: str, desp: str = '') -> dict:
         print(f"⚠️ 消息推送失败: {str(e)}")
         return {'error': str(e)}
 
-def load_accounts() -> list:
-    """加载账户配置"""
-    accounts = os.environ.get('ACCOUNTS_AND_PASSWORDS')  # 修改点
-    if not accounts:
-        raise ValueError("未设置ACCOUNTS_AND_PASSWORDS环境变量")
+def load_accounts(accounts_str: str) -> list:
+    """从字符串解析账户信息"""
+    if not accounts_str:
+        raise ValueError("账户信息为空")
     
     try:
-        return [pair.split(',') for pair in accounts.split(';') if pair]
+        return [pair.split(',') for pair in accounts_str.split(';') if pair]
     except Exception as e:
         raise ValueError(f"账户格式错误: {str(e)}")
 
 def modify_steps(account: str, password: str, sendkey: str) -> str:
     """修改步数并发送通知"""
-    min_steps = int(os.environ.get('MIN_STEPS', 50000))  # 修改点
-    max_steps = int(os.environ.get('MAX_STEPS', 80000))  # 修改点
-    attempts = int(os.environ.get('MAX_ATTEMPTS', 3))    # 修改点
+    min_steps = 50000  # 可改为从环境变量获取
+    max_steps = 80000
+    attempts = 3
     
     masked_account = f"{account[:3]}***{account[-3:]}"
     last_error = None
@@ -71,18 +69,17 @@ def modify_steps(account: str, password: str, sendkey: str) -> str:
         
         print(f"尝试 {attempt}/{attempts} 失败: {last_error}")
 
-    # 全部尝试失败后发送告警
     error_msg = f"❌ 账号 {masked_account} 修改失败\n错误: {last_error}"
     sc_send(sendkey, "步数修改失败", error_msg)
     return error_msg
 
 def main():
     try:
-        sendkey = os.environ.get('SENDKEY')  # 修改点
-        if not sendkey:
-            raise ValueError("未配置Server酱SENDKEY")
+        # 从GitHub Actions Secrets获取敏感信息
+        sendkey = os.environ['SERVERCHAN_KEY']
+        accounts_str = os.environ['ACCOUNT_INFO']
         
-        accounts = load_accounts()
+        accounts = load_accounts(accounts_str)
         print(f"🔍 加载到 {len(accounts)} 个账户")
 
         for acc, pwd in accounts:
@@ -90,8 +87,8 @@ def main():
             print(result)
             
     except Exception as e:
-        if 'SENDKEY' in os.environ:  # 直接检查环境变量字典
-            sc_send(os.environ['SENDKEY'], "步数修改脚本崩溃", f"错误: {str(e)}")
+        if 'SERVERCHAN_KEY' in os.environ:
+            sc_send(os.environ['SERVERCHAN_KEY'], "步数修改脚本崩溃", f"错误: {str(e)}")
         raise
 
 if __name__ == "__main__":
