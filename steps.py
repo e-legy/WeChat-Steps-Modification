@@ -32,7 +32,7 @@ def sc_send(sendkey: str, title: str, desp: str = '') -> dict:
 
 def load_accounts() -> list:
     """加载账户配置"""
-    accounts = os.getenv('ACCOUNTS_AND_PASSWORDS')
+    accounts = os.environ.get('ACCOUNTS_AND_PASSWORDS')  # 修改点
     if not accounts:
         raise ValueError("未设置ACCOUNTS_AND_PASSWORDS环境变量")
     
@@ -43,9 +43,9 @@ def load_accounts() -> list:
 
 def modify_steps(account: str, password: str, sendkey: str) -> str:
     """修改步数并发送通知"""
-    min_steps = int(os.getenv('MIN_STEPS', 50000))
-    max_steps = int(os.getenv('MAX_STEPS', 80000))
-    attempts = int(os.getenv('MAX_ATTEMPTS', 3))
+    min_steps = int(os.environ.get('MIN_STEPS', 50000))  # 修改点
+    max_steps = int(os.environ.get('MAX_STEPS', 80000))  # 修改点
+    attempts = int(os.environ.get('MAX_ATTEMPTS', 3))    # 修改点
     
     masked_account = f"{account[:3]}***{account[-3:]}"
     last_error = None
@@ -78,7 +78,7 @@ def modify_steps(account: str, password: str, sendkey: str) -> str:
 
 def main():
     try:
-        sendkey = os.getenv('SENDKEY')
+        sendkey = os.environ.get('SENDKEY')  # 修改点
         if not sendkey:
             raise ValueError("未配置Server酱SENDKEY")
         
@@ -90,8 +90,8 @@ def main():
             print(result)
             
     except Exception as e:
-        if 'SENDKEY' in os.environ:
-            sc_send(os.getenv('SENDKEY'), "步数修改脚本崩溃", f"错误: {str(e)}")
+        if 'SENDKEY' in os.environ:  # 直接检查环境变量字典
+            sc_send(os.environ['SENDKEY'], "步数修改脚本崩溃", f"错误: {str(e)}")
         raise
 
 if __name__ == "__main__":
