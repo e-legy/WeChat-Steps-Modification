@@ -2,13 +2,10 @@ import os
 import requests
 import random
 import time
-from dotenv import load_dotenv
-
-# 加载环境变量
-load_dotenv()
+import re
 
 def sc_send(sendkey: str, title: str, desp: str = '') -> dict:
-    """Server酱消息推送（安全版）"""
+    """Server酱消息推送"""
     if not sendkey:
         raise ValueError("Server酱SENDKEY未设置")
     
@@ -93,7 +90,8 @@ def main():
             print(result)
             
     except Exception as e:
-        sc_send(os.getenv('SENDKEY'), "步数修改脚本崩溃", f"错误: {str(e)}")
+        if 'SENDKEY' in os.environ:
+            sc_send(os.getenv('SENDKEY'), "步数修改脚本崩溃", f"错误: {str(e)}")
         raise
 
 if __name__ == "__main__":
