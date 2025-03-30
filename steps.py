@@ -41,8 +41,8 @@ def load_accounts(accounts_str: str) -> list:
 
 def modify_steps(account: str, password: str, sendkey: str) -> str:
     """修改步数并发送通知"""
-    min_steps = 50000  # 可改为从环境变量获取
-    max_steps = 80000
+    min_steps = 15000  # 可改为从环境变量获取
+    max_steps = 24000
     attempts = 3
     
     masked_account = f"{account[:3]}***{account[-3:]}"
