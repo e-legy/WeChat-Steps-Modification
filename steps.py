@@ -53,10 +53,18 @@ def modify_steps(account: str, password: str, sendkey: str) -> str:
         try:
             time.sleep(random.uniform(1, 3))
             resp = requests.get(
-                f"https://steps.api.030101.xyz/api?account={account}&password={password}&steps={steps}",
+                f"https://steps.8bq.ovh/api?account={account}&password={password}&steps={steps}",
                 timeout=20
             )
-            data = resp.json()
+            # 检查状态码
+            if resp.status_code != 200:
+                raise ValueError(f"API 请求失败，状态码: {resp.status_code}, 响应: {resp.text}")
+
+            # 尝试解析 JSON
+            try:
+                data = resp.json()
+            except Exception as e:
+                raise ValueError(f"JSON 解析失败: {str(e)}, 响应: {resp.text}")
 
             if data.get('status') == 'success':
                 msg = f"✅ 账号 {masked_account} 修改成功\n步数: {steps}"
