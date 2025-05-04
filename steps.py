@@ -53,7 +53,7 @@ def modify_steps(account: str, password: str, sendkey: str) -> str:
         try:
             time.sleep(random.uniform(1, 3))
             resp = requests.get(
-                f"https://steps.8bq.ovh/api?account={account}&password={password}&steps={steps}",
+                f"https://steps.api.030101.xyz/api?account={account}&password={password}&steps={steps}",
                 timeout=20
             )
             # 检查状态码
